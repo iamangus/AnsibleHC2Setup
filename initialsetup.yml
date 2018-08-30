@@ -1,0 +1,61 @@
+---
+- name: Initial setup
+  hosts: setupserver
+
+  tasks:
+    - name: setting hostname
+      hostname:
+        name: '{{ nodename }}'
+      register: task_result
+
+
+    - name: Reboot immediately
+      shell: "sleep 5 && reboot"
+      async: 1
+      poll: 0
+      when: task_result is changed
+
+    - name: Wait for the reboot to complete
+      wait_for_connection:
+        connect_timeout: 20
+        sleep: 5
+        delay: 5
+        timeout: 300   
+      when: task_result is changed
+  
+    - name: Install aptitude
+      apt:
+        name: aptitude
+      become: yes
+
+    - name: Upgrade all packages to the latest version
+      apt:
+        name: "*"
+        state: latest
+      become: yes
+
+    - name: Ansible create file if it doesn't exist example
+      file:
+        path: "/etc/netplan/01-netcfg.yaml"
+        state: touch
+    
+    - name: insert/update eth0 configuration stanza in /etc/network/interfaces
+      blockinfile:
+        path: /etc/netplan/01-netcfg.yaml
+        block: |
+          network:
+            version: 2
+            renderer: networkd
+            ethernets:
+              eth0:
+               dhcp4: no
+               addresses: [{{ staticip }}/24]
+               gateway4: 192.168.0.1
+               nameservers:
+                 addresses: [192.168.0.1,8.8.4.4]
+      
+    - name: Applying netplan configuration
+      shell: "sleep 5 && netplan apply"
+      async: 1
+      poll: 0
+      become: true
