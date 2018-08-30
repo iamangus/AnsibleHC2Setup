@@ -1,0 +1,45 @@
+---
+- name: Docker Setup
+  hosts: nodes
+
+  tasks:   
+    - name: Install docker.io
+      package:
+        name: docker.io      
+        state: present
+      register: task_result
+      
+    - name: Reboot immediately
+      shell: "sleep 5 && reboot"
+      async: 1
+      poll: 0
+      when: task_result is changed
+
+    - name: Wait for the reboot to complete
+      wait_for_connection:
+        connect_timeout: 20
+        sleep: 5
+        delay: 5
+        timeout: 300   
+      when: task_result is changed
+
+    - name: Init a new swarm with default parameters
+      docker_swarm:
+        state: present
+        advertise_addr: '{{ staticip }}'
+      register: swarm_facts
+      when: inventory_hostname == '192.168.0.50'
+
+
+    - name: Get Worker Token
+      set_fact:
+        worker_token: '{{ swarm_facts.swarm_facts.JoinTokens.Worker }}'
+      when: inventory_hostname == '192.168.0.50'
+
+    - name: add worker nodes
+      docker_swarm:
+        state: join
+        advertise_addr: '{{ staticip }}'
+        join_token: "{{ hostvars['192.168.0.50']['worker_token'] }}"
+        remote_addrs: [ '192.168.0.50' ]
+      when: inventory_hostname != '192.168.0.50'
