@@ -49,9 +49,8 @@
         - setup
  
     - name: Install gluster software
-      package:
+      apt:
         name: "{{ item }}"
-        state: present
       with_items:
         - glusterfs-server
         - glusterfs-client
