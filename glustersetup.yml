@@ -1,6 +1,6 @@
 ---
 # Credit to github.com/jahrik for this file
-- hosts: glustersetup
+- hosts: nodes
   become: true
   vars:
     gluster_mount_dir: /mnt/g1
@@ -65,21 +65,17 @@
  
     - name: Install gluster software
       apt:
-        name: "{{ item }}"
-      with_items:
-        - glusterfs-server
-        - glusterfs-client
-        - attr
+        name: [glusterfs-server, glusterfs-client, attr]
+      tags:
+        - setup
 
-    - name: Configure Gluster volume.
+    - name: configure gluster volume
       gluster_volume:
         state: present
         name: "{{ gluster_brick_name }}"
         brick: "{{ gluster_brick_dir }}"
         replicas: 2
-        # disperses: "{{ groups.gluster | length }}"
-        # redundancies: 1
-        cluster: "{{ groups.glustersetup | join(',') }}"
+        cluster: "{{ groups.nodes | join(',') }}"
         host: "{{ inventory_hostname }}"
         force: yes
       run_once: true
@@ -90,10 +86,7 @@
         name: "{{ ram_brick_name }}"
         brick: "{{ ram_brick_dir }}"
         stripes: 2
-        #replicas: 2
-        # disperses: "{{ groups.gluster | length }}"
-        # redundancies: 1
-        cluster: "{{ groups.glustersetup | join(',') }}"
+        cluster: "{{ groups.nodes | join(',') }}"
         host: "{{ inventory_hostname }}"
         force: yes
       run_once: true
