@@ -8,7 +8,7 @@
         state: directory
         mode: 0755
       with_items:
-        - "{{ /mnt/g1/config/sonarr }}"
+        - "{{ '/mnt/g1/config/sonarr' }}"
         - "{{ /mnt/g1/config/radarr }}"
         - "{{ /mnt/g1/config/plex }}" 
         - "{{ /mnt/g1/config/sabnzb }}"
