@@ -1,6 +1,6 @@
 ---
 - name: Directory Setup
-- hosts: nodes
+  hosts: nodes
   tasks: 
     - name: Setup directories
       file:
