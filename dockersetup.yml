@@ -1,26 +1,25 @@
 ---
 - name: Docker Setup
-  hosts: nodes
+  hosts: dockersetup
 
   tasks:   
 
     - name: Init a new swarm with default parameters
       docker_swarm:
         state: present
-        advertise_addr: '{{ staticip }}'
+        #advertise_addr: '{{ staticip }}'
       register: swarm_facts
-      when: inventory_hostname == '192.168.0.50'
-
+      when: inventory_hostname == 'glust01'
 
     - name: Get Worker Token
       set_fact:
         worker_token: '{{ swarm_facts.swarm_facts.JoinTokens.Worker }}'
-      when: inventory_hostname == '192.168.0.50'
+      when: inventory_hostname == 'glust01'
 
     - name: add worker nodes
       docker_swarm:
         state: join
         advertise_addr: '{{ staticip }}'
-        join_token: "{{ hostvars['192.168.0.50']['worker_token'] }}"
+        join_token: "{{ hostvars['glust01']['worker_token'] }}"
         remote_addrs: [ '192.168.0.50' ]
-      when: inventory_hostname != '192.168.0.50'
+      when: inventory_hostname != 'glust01'
