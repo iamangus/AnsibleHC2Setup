@@ -47,7 +47,7 @@
     - name: Ensure Gluster volume is mounted.
       mount:
         name: "{{ gluster_mount_dir }}"
-        src: "{{ inventory_hostname }}:/{{ gluster_brick_name }}"
+        src: "glust01:/{{ gluster_brick_name }}"
         fstype: glusterfs
         opts: "defaults,_netdev,log-level=WARNING,log-file=/var/log/gluster.log"
         state: mounted
