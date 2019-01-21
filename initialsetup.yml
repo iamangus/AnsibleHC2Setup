@@ -21,28 +21,11 @@
         delay: 5
         timeout: 300   
       when: task_result is changed
-  
-    - name: Install aptitude
-      apt:
-        name: aptitude
-      become: yes
-
-    - name: Install parted
-      package:
-        name: parted
-        state: present
-
-    - name: Install docker.io
-      package:
-        name: docker.io      
-        state: present
-      register: task_result
       
     - name: Install gluster software
-      apt:
-        name: [glusterfs-server, glusterfs-client, attr]
-      tags:
-        - setup
+      package:
+        name: [aptitude, docker.io, parted, glusterfs-server, glusterfs-client, attr]
+        state: present
 
     - name: Upgrade all packages to the latest version
       apt:
@@ -54,5 +37,3 @@
       shell: "sleep 5 && reboot"
       async: 1
       poll: 0
-      when: task_result is changed
-
