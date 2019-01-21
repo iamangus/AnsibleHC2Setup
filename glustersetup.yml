@@ -6,26 +6,18 @@
     gluster_mount_dir: /mnt/g1
     gluster_brick_dir: /bricks/brick1
     gluster_brick_name: g1
-    ram_mount_dir: /mnt/g2
-    ram_brick_dir: /bricks/brick2
-    ram_brick_name: g2
 
   tasks:
-
     - name: Create Primary partition
       parted:
         device: /dev/sda
         number: 1
         state: present
-      tags:
-        - setup
 
     - name: Create a ext4 filesystem on /dev/sda1
       filesystem:
         fstype: ext4
         dev: /dev/sda1
-      tags:
-        - setup
 
     - name: Ensure Gluster brick and mount directories exist.
       file:
@@ -35,62 +27,29 @@
       with_items:
         - "{{ gluster_brick_dir }}"
         - "{{ gluster_mount_dir }}"
-        - "{{ ram_brick_dir }}"
-        - "{{ ram_mount_dir }}"
 
     - name: Mount "{{ gluster_brick_dir }}"
       mount:
         path: "{{ gluster_brick_dir }}"
         src: /dev/sda1
         fstype: ext4
-        state: present
-      tags:
-        - setup
-        
-    - name: Mount "{{ ram_brick_dir }}"
-      mount:
-        path: "{{ ram_brick_dir }}"
-        src: tmpfs
-        fstype: tmpfs
-        opts: "size=200M"
         state: mounted
-      tags:
-        - setup
 
     - name: configure gluster volume
       gluster_volume:
         state: present
         name: "{{ gluster_brick_name }}"
         brick: "{{ gluster_brick_dir }}"
-        replicas: 2
         cluster: "{{ groups.nodes | join(',') }}"
         host: "{{ inventory_hostname }}"
         force: yes
       run_once: true
       
-    - name: Configure ramdisk Gluster volume.
-      gluster_volume:
-        state: present
-        name: "{{ ram_brick_name }}"
-        brick: "{{ ram_brick_dir }}"
-        stripes: 2
-        cluster: "{{ groups.nodes | join(',') }}"
-        host: "{{ inventory_hostname }}"
-        force: yes
-      run_once: true
 
     - name: Ensure Gluster volume is mounted.
       mount:
         name: "{{ gluster_mount_dir }}"
         src: "{{ inventory_hostname }}:/{{ gluster_brick_name }}"
-        fstype: glusterfs
-        opts: "defaults,_netdev,log-level=WARNING,log-file=/var/log/gluster.log"
-        state: mounted
-        
-    - name: Ensure Gluster ramdisk volume is mounted.
-      mount:
-        name: "{{ ram_mount_dir }}"
-        src: "{{ inventory_hostname }}:/{{ ram_brick_name }}"
         fstype: glusterfs
         opts: "defaults,_netdev,log-level=WARNING,log-file=/var/log/gluster.log"
         state: mounted
