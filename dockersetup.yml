@@ -3,11 +3,14 @@
   hosts: dockersetup
 
   tasks:   
+    - name: install docker
+      pip:
+        name: docker
 
     - name: Init a new swarm with default parameters
       docker_swarm:
         state: present
-        #advertise_addr: '{{ staticip }}'
+        advertise_addr: hostvars[inventory_hostname]['ansible_default_ipv4']['address']
       register: swarm_facts
       when: inventory_hostname == 'glust01'
 
@@ -19,7 +22,7 @@
     - name: add worker nodes
       docker_swarm:
         state: join
-        advertise_addr: '{{ staticip }}'
+        advertise_addr: hostvars[inventory_hostname]['ansible_default_ipv4']['address']
         join_token: "{{ hostvars['glust01']['worker_token'] }}"
         remote_addrs: [ '192.168.0.50' ]
       when: inventory_hostname != 'glust01'
