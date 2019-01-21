@@ -8,7 +8,6 @@
         name: '{{ nodename }}'
       register: task_result
 
-
     - name: Reboot immediately
       shell: "sleep 5 && reboot"
       async: 1
@@ -28,17 +27,22 @@
         name: aptitude
       become: yes
 
+    - name: Install parted
+      package:
+        name: parted
+        state: present
+
     - name: Install docker.io
       package:
         name: docker.io      
         state: present
       register: task_result
       
-    - name: Reboot immediately
-      shell: "sleep 5 && reboot"
-      async: 1
-      poll: 0
-      when: task_result is changed
+    - name: Install gluster software
+      apt:
+        name: [glusterfs-server, glusterfs-client, attr]
+      tags:
+        - setup
 
     - name: Upgrade all packages to the latest version
       apt:
@@ -46,4 +50,9 @@
         state: latest
       become: yes
 
+    - name: Reboot immediately
+      shell: "sleep 5 && reboot"
+      async: 1
+      poll: 0
+      when: task_result is changed
 
