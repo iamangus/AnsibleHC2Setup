@@ -11,12 +11,6 @@
     ram_brick_name: g2
 
   tasks:
-    - name: Install parted
-      package:
-        name: parted
-        state: present
-      tags:
-        - setup
 
     - name: Create Primary partition
       parted:
@@ -60,12 +54,6 @@
         fstype: tmpfs
         opts: "size=200M"
         state: mounted
-      tags:
-        - setup
- 
-    - name: Install gluster software
-      apt:
-        name: [glusterfs-server, glusterfs-client, attr]
       tags:
         - setup
 
