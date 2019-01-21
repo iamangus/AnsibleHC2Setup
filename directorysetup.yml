@@ -16,3 +16,4 @@
         - "{{ '/mnt/g1/media/movies' }}"
         - "{{ '/mnt/g1/downloads/complete' }}"
         - "{{ '/mnt/g1/downloads/incomplete' }}"
+      when: inventory_hostname == '192.168.0.50'
