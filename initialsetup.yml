@@ -28,10 +28,11 @@
         state: present
 
     - name: Upgrade all packages to the latest version
-      apt:
+      package:
         name: "*"
         state: latest
-      become: yes
+      async: 900
+      poll: 20
 
     - name: Reboot immediately
       shell: "sleep 5 && reboot"
