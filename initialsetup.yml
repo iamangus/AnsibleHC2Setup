@@ -28,9 +28,22 @@
         name: aptitude
       become: yes
 
+    - name: Install docker.io
+      package:
+        name: docker.io      
+        state: present
+      register: task_result
+      
+    - name: Reboot immediately
+      shell: "sleep 5 && reboot"
+      async: 1
+      poll: 0
+      when: task_result is changed
+
     - name: Upgrade all packages to the latest version
       apt:
         name: "*"
         state: latest
       become: yes
+
 
