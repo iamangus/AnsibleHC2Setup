@@ -1,0 +1,53 @@
+---
+- name: plex setup
+  hosts: plex
+  vars:
+    gluster_mount_dir: /mnt/g1
+    gluster_brick_dir: /bricks/brick1
+    gluster_brick_name: g1
+
+  tasks:
+  
+    - name: Upgrade all packages to the latest version
+      package:
+        name: "*"
+        state: latest
+      async: 1800
+      poll: 20
+
+    - name: Reboot immediately
+      shell: "sleep 5 && reboot"
+      async: 1
+      poll: 0
+
+    - name: Wait for the reboot to complete
+      wait_for_connection:
+        connect_timeout: 20
+        sleep: 5
+        delay: 5
+        timeout: 300   
+      
+    - name: Install gluster software
+      package:
+        name: [aptitude, docker.io, parted, glusterfs-client, attr]
+        state: present
+
+    - name: Reboot immediately
+      shell: "sleep 5 && reboot"
+      async: 1
+      poll: 0
+      
+    - name: Wait for the reboot to complete
+      wait_for_connection:
+        connect_timeout: 20
+        sleep: 5
+        delay: 5
+        timeout: 300   
+        
+    - name: Ensure Gluster volume is mounted.
+      mount:
+        name: "{{ gluster_mount_dir }}"
+        src: "{{ inventory_hostname }}:/{{ gluster_brick_name }}"
+        fstype: glusterfs
+        opts: "defaults,_netdev,log-level=WARNING,log-file=/var/log/gluster.log"
+        state: mounted
