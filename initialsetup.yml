@@ -12,7 +12,7 @@
       package:
         name: "*"
         state: latest
-      async: 900
+      async: 1800
       poll: 20
 
     - name: Reboot immediately
