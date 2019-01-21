@@ -7,6 +7,13 @@
       hostname:
         name: '{{ nodename }}'
       register: task_result
+      
+    - name: Upgrade all packages to the latest version
+      package:
+        name: "*"
+        state: latest
+      async: 900
+      poll: 20
 
     - name: Reboot immediately
       shell: "sleep 5 && reboot"
@@ -26,13 +33,6 @@
       package:
         name: [aptitude, docker.io, parted, glusterfs-server, glusterfs-client, attr]
         state: present
-
-    - name: Upgrade all packages to the latest version
-      package:
-        name: "*"
-        state: latest
-      async: 900
-      poll: 20
 
     - name: Reboot immediately
       shell: "sleep 5 && reboot"
