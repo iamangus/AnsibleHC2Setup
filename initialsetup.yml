@@ -1,6 +1,6 @@
 ---
 - name: Initial setup
-  hosts: setupserver
+  hosts: nodes
 
   tasks:
     - name: setting hostname
@@ -19,7 +19,6 @@
       shell: "sleep 5 && reboot"
       async: 1
       poll: 0
-      when: task_result is changed
 
     - name: Wait for the reboot to complete
       wait_for_connection:
