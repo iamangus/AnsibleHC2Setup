@@ -29,7 +29,7 @@
       
     - name: Install gluster software
       package:
-        name: [aptitude, docker.io, parted, glusterfs-client, attr]
+        name: [docker.io, parted, glusterfs-client, attr]
         state: present
 
     - name: Reboot immediately
